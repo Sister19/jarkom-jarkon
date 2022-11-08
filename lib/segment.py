@@ -1,18 +1,30 @@
 import struct
 
 # Constants 
-SYN_FLAG = 0b0
-ACK_FLAG = 0b0
-FIN_FLAG = 0b0
+SYN_FLAG = 0b00000010
+ACK_FLAG = 0b00010000
+FIN_FLAG = 0b00000001
 
 class SegmentFlag:
     def __init__(self, flag : bytes):
-        # Init flag variable from flag byte
-        pass
-
+        self.syn = bool(flag & SYN_FLAG)
+        self.ack = bool(flag & ACK_FLAG)
+        self.fin = bool(flag & FIN_FLAG)
+        self.newBytes = 0b00000000
+        
     def get_flag_bytes(self) -> bytes:
+        
+        if self.syn:
+            self.newBytes |= SYN_FLAG
+        if self.ack:
+            self.newBytes |= ACK_FLAG
+        if self.fin:
+            self.newBytes |= FIN_FLAG
+        return struct.pack("B", self.newBytes)
+            
         # Convert this object to flag in byte form
-        pass
+        
+        
 
 
 
