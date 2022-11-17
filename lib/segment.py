@@ -82,10 +82,12 @@ class Segment:
 
     def set_flag(self, flag_list : list):
         x = 0b00000000
-        for i in range(len(flag_list)):
+        i = 0
+        while(i < len(flag_list)):
             x |= flag_list[i]
+            i += 1
         self.flag = SegmentFlag(x)
-
+   
     # -- Getter --
     def get_flag(self) -> SegmentFlag:
         return self.flag

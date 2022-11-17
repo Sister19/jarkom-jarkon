@@ -27,7 +27,7 @@ class Client:
 
     def three_way_handshake(self):
         #initialize connection
-        self.connection = Connection(self.clientAddress[0], self.clientAddress[1])
+        self.connection = Connection(self.client_addr[0], self.client_addr[1])
         print(f"Client started at {self.connection.ip}:{self.connection.port}")
         print("[!] Initiating three way handshake...")
         self.syn_request()
@@ -38,10 +38,10 @@ class Client:
     def send_flag(self, flag: list):
         packet_to_send = Segment()
         packet_to_send.set_flag(flag)
-        self.connection.send_data(packet_to_send.get_bytes(), self.serverAddress)
+        self.connection.send_data(packet_to_send.get_bytes(), self.server_addr)
 
     def syn_request(self):
-        print(f"[!] [Handshake] Sending broadcast SYN request to port {self.serverAddress[1]}")
+        print(f"[!] [Handshake] Sending broadcast SYN request to port {self.server_addr[1]}")
         self.send_flag([SYN_FLAG])
 
     def listen_from_server(self):
@@ -54,7 +54,7 @@ class Client:
         _, result, check = self.listen_from_server()
         if(check and result.get_flag().syn and result.get_flag().ack):
             self.send_flag([ACK_FLAG])
-            print(f"[S] Getting response from {self.serverAddress[0]}:{self.serverAddress[1]}")
+            print(f"[S] Getting response from {self.server_addr[0]}:{self.server_addr[1]}")
         else:
             print("[!] Checksum failed")
             
@@ -70,8 +70,8 @@ class Client:
         req_num = 0
         while True:
             response, address, check = self.connection.listen_single_segment()
-            if check and address == self.serverAddress:
-                if req_num == response.sequence:
+            if check and address == self.server_addr:
+                if req_num == response.seq_num:
                     print(f"[Segment SEQ={req_num + 1}] Received, Ack sent")
                     self.send_ack(req_num, address)
                     file_data[req_num] = response.data
@@ -88,7 +88,7 @@ class Client:
                         return self
                 else:
                     print(f'[Segment SEQ={req_num + 1}] Segment damaged. Ack prev sequence number.')
-                    req_num = response.ackNum
+                    req_num = response.ack_num
             elif not check:
                 print(f'[Segment SEQ={req_num + 1}] Checksum failed. Ack prev sequence number.')
             else:
