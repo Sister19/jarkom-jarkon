@@ -41,7 +41,7 @@ class Client:
         self.connection.send_data(packet_to_send.get_bytes(), self.server_addr)
 
     def syn_request(self):
-        print(f"[!] [Handshake] Sending broadcast SYN request to port {self.server_addr[1]}")
+        print(f"[!] Sending broadcast SYN request to port {self.server_addr[1]}")
         self.send_flag([SYN_FLAG])
 
     def listen_from_server(self):
@@ -50,7 +50,7 @@ class Client:
         return address, response, valid
 
     def syn_ack(self):
-        print("[!] [Handshake] Waiting for response...")
+        print("[!] Waiting for response...")
         _, result, check = self.listen_from_server()
         if(check and result.get_flag().syn and result.get_flag().ack):
             self.send_flag([ACK_FLAG])
