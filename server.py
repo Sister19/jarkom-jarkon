@@ -29,8 +29,8 @@ class Server:
     def listen_for_clients(self):
         # Waiting client for connect
         self.connectionList = []
-        print(f"[!] Listening to broadcast address for clients.")
         while True:
+            print(f"[!] Listening to broadcast address for clients.")
             response, address, valid = self.connection.listen_single_segment()         
             if (response.get_flag().syn and valid and not(address in self.connectionList)):
                 self.connectionList.append(address)
