@@ -94,26 +94,6 @@ class Client:
             else:
                 print(check, address)
 
-
-    def listen(self):
-        assert self.connection != None
-
-        response, address, valid = self.connection.listen_single_segment()
-        return address, response, valid
-
-    def sendFlag(self, flags: list):
-        assert self.connection != None
-
-        packet = Segment()
-        packet.set_flag(flags)
-        self.connection.send_data(packet.get_bytes(), self.serverAddress)
-
-    def close(self):
-        assert self.connection != None
-        self.connection.close()
-        self.connection = None
-        return self
-
 if __name__ == '__main__':
     main = Client()
     main.three_way_handshake()
