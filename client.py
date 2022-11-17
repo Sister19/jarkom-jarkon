@@ -9,6 +9,10 @@ IP_SERVER = "127.0.0.1"
 PORT_SERVER = 54321
 IP_CLIENT = "127.0.0.1"
 
+SYN_FLAG = 0b00000010
+ACK_FLAG = 0b00010000
+FIN_FLAG = 0b00000001
+
 class Client:
     def __init__(self):
         # Init client
