@@ -43,7 +43,6 @@ class Client:
     def listen_from_server(self):
         self.connection.set_listen_timeout(100)
         response, address, valid = self.connection.listen_single_segment()
-        print("masuk")
         return address, response, valid
 
     def syn_ack(self):
