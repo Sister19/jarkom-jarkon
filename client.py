@@ -22,9 +22,39 @@ class Client:
         self.connection = None
 
     def three_way_handshake(self):
-        # Three Way Handshake, client-side
-        pass
+        #initialize connection
+        self.connection = Connection(self.clientAddress[0], self.clientAddress[1])
+        print(f"Client started at {self.connection.ip}:{self.connection.port}")
+        print("[!] Initiating three way handshake...")
+        self.syn_request()
+        self.syn_ack()
+        return self
+        
+    
+    def send_flag(self, flag: list):
+        packet_to_send = Segment()
+        packet_to_send.set_flag(flag)
+        self.connection.send_data(packet_to_send.get_bytes(), self.serverAddress)
 
+    def syn_request(self):
+        print(f"[!] Sending broadcast SYN request to port {self.serverAddress[1]}")
+        self.send_flag([SYN_FLAG])
+
+    def listen_from_server(self):
+        self.connection.set_listen_timeout(100)
+        response, address, valid = self.connection.listen_single_segment()
+        print("masuk")
+        return address, response, valid
+
+    def syn_ack(self):
+        print("[!] Waiting for response...")
+        _, result, check = self.listen_from_server()
+        if(check and result.get_flag().syn and result.get_flag().ack):
+            self.send_flag([ACK_FLAG])
+            print(f"[S] Getting response from {self.serverAddress[0]}:{self.serverAddress[1]}")
+        else:
+            print("[!] Checksum failed")
+            
     def listen_file_transfer(self):
         # File transfer, client-side
         pass
