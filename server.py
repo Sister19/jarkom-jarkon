@@ -68,15 +68,12 @@ class Server:
         f.seek(0,2)
         size = f.tell()
         Total = math.ceil(size / 32768)
-
-        self.connection.set_listen_timeout(100)
         print(f"[!] [Client {self.active}] Initiating file transfer...")
 
         seqWindow = min(4, Total)
         seqBase = 0
 
         while seqBase < Total:
-            try:
                 for i in range(seqWindow - seqBase):
                     # send to client
                     print(f"[!] [Client {self.active}] [Num={seqBase + i + 1}] Sending segment to client...")
@@ -90,24 +87,26 @@ class Server:
 
                 for i in range(seqWindow - seqBase):
                     # receive from client
-                    print(f"[!] [Client {self.active}] [Num={seqBase + i}] Sending segment to client...")
-                    response, responseAddress, valid= self.connection.listen_single_segment()
-                    if valid and client_addr == responseAddress and response.get_flag().ack:
-                        if (response.ack_num == seqBase):
-                            print(f'ACK received, new sequence base = {seqBase + 2}')
-                            seqBase += 1
-                            seqWindow = min(
-                                4 + seqBase, Total)
+                    try:
+                        self.connection.socket.settimeout(0.5)
+                        print(f"[!] [Client {self.active}] [Num={seqBase + i}] Sending segment to client...")
+                        response, responseAddress, valid= self.connection.listen_single_segment()
+                        if valid and client_addr == responseAddress and response.get_flag().ack:
+                            if (response.ack_num == seqBase):
+                                print(f'ACK received, new sequence base = {seqBase + 2}')
+                                seqBase += 1
+                                seqWindow = min(
+                                    4 + seqBase, Total)
+                            else:
+                                print('NOT ACKED. Duplicate Ack found')
+                        elif responseAddress != client_addr:
+                            print('NOT ACKED. Address does not match')
+                        elif not valid:
+                            print('NOT ACKED. Checksum failed')
                         else:
-                            print('NOT ACKED. Duplicate Ack found')
-                    elif responseAddress != client_addr:
-                        print('NOT ACKED. Address does not match')
-                    elif not valid:
-                        print('NOT ACKED. Checksum failed')
-                    else:
-                        print('NOT ACKED')
-            except socket.timeout:
-                print(f"Timeout")
+                            print('NOT ACKED')
+                    except socket.timeout:
+                        print(f"[!] [Client {self.active}] [Num={seqBase + i}] [Timeout] ACK response timeout")
 
         print(f"[!] [Client {self.active}] [CLS] File transfer completed, initiating closing connection...")
         print(f"[!] [Client {self.active}] [FIN] Sending FIN...")
